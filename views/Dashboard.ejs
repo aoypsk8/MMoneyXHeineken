@@ -12,13 +12,16 @@
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
-
     <!-- DataTables Responsive Extension CSS -->
     <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet">
     <!-- JSZip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <!-- ExcelJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.1.1/exceljs.min.js"></script>
+    <!-- jQuery UI for date picker -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <style>
         #map {
             height: 1000px;
@@ -84,21 +87,22 @@
         <h1 class="flex items-center font-sans font-bold break-normal py-8 text-xl md:text-3xl">
             <span class="text-red-500">M Money X</span>&nbsp;<span class="text-green-600">Heiniken</span>
         </h1>
-        <ul class="flex mb-5">
-            <li class="mr-6">
-                <a id="activeTab" href="#" class="text-gray-500 hover:text-blue-800">Codes ທີ່ໃຊ້ແລ້ວ</a>
-            </li>
-            <li class="mr-6">
-                <a id="inactiveTab" href="#" class="text-gray-500 hover:text-blue-800">Codes ທີ່ໃຊ້ແລ້ວ</a>
-            </li>
-        </ul>
+
+        <!-- Date Range Inputs -->
+        <div class="mb-4 flex justify-end  ">
+            <label for="min-date" class="mr-2">From:</label>
+            <input type="text" id="min-date" name="min-date" class="border rounded px-2 py-1">
+
+            <label for="max-date" class="ml-4 mr-2">To:</label>
+            <input type="text" id="max-date" name="max-date" class="border rounded px-2 py-1">
+        </div>
 
         <!-- Active Table Container -->
         <div id="activeTableContainer">
             <table id="activeTable" class="display responsive nowrap" style="width:100%">
                 <thead>
                     <tr class="bg-gray-200">
-                        <th class="px-4 py-2">ID</th>
+                        <th class="px-4 py-2">ລຳດັບ</th>
                         <th class="px-4 py-2">Code</th>
                         <th class="px-4 py-2">ເບິໂທ</th>
                         <th class="px-4 py-2">ມູນຄ່າ</th>
@@ -109,47 +113,27 @@
                 </thead>
                 <tbody class="bg-white">
                     <!-- Active data rendering with EJS or similar templating engine -->
-                    <% data.activeRows.forEach(row => { %>
+                    <% data.forEach(row=> { %>
                     <tr class="hover:bg-gray-100">
-                        <td class="border px-4 py-2 text-center"><%= row.id %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.code %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.msisdn %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.amount %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.created %></td>
-                        <td class="border px-4 py-2 text-center"><%=  `${row.latitude}, ${row.longitude}` %></td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.id %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.codes %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.msisdn %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.amount %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= new Date(row.created).toLocaleDateString('en-US', { timeZone: 'Asia/Bangkok' }) %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.location %>
+                        </td>
                         <td class="border px-4 py-2 text-center">ໃຊ້ແລ້ວ</td>
-                    </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Inactive Table Container -->
-        <!-- id, codes, amount, active, created, remark, tranid, msisdn, tran_date, startdate, enddate, title, location
-	FROM public."Redeem";
-     -->
-        <div id="inactiveTableContainer" style="display:none;">
-            <table id="inactiveTable" class="display responsive nowrap" style="width:100%">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="px-4 py-2">ID</th>
-                        <th class="px-4 py-2">Code</th>
-                        <th class="px-4 py-2">Amount</th>
-                        <th class="px-4 py-2">Created</th>
-                        <th class="px-4 py-2">Enddate</th>
-                        <th class="px-4 py-2">Active</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white">
-                    <!-- Inactive data rendering with EJS or similar templating engine -->
-                    <% data.inactiveRows.forEach(row => { %>
-                    <tr class="hover:bg-gray-100">
-                        <td class="border px-4 py-2 text-center"><%= row.id %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.code %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.amount %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.created %></td>
-                        <td class="border px-4 py-2 text-center"><%= row.enddate %></td>
-                        <td class="border px-4 py-2 text-center">ຍັງບໍ່ທັນໄດ້ໃຊ້</td>
                     </tr>
                     <% }); %>
                 </tbody>
@@ -160,9 +144,6 @@
         <div id="map"></div>
 
     </div>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
@@ -177,69 +158,101 @@
             var activeTable = $('#activeTable').DataTable({
                 responsive: true,
                 dom: 'Bfrtip',
+                pageLength: 50,
                 buttons: [
                     'excelHtml5',
                 ]
             });
 
-            var inactiveTable = $('#inactiveTable').DataTable({
-                responsive: true,
-                dom: 'Bfrtip',
-                buttons: [
-                    'excelHtml5',
-                ]
+            // Date range filter
+            $.fn.dataTable.ext.search.push(
+                function (settings, data, dataIndex) {
+                    var min = $('#min-date').datepicker("getDate");
+                    var max = $('#max-date').datepicker("getDate");
+                    var startDate = new Date(data[4]);
+
+                    if (min == null && max == null) {
+                        return true;
+                    }
+                    if (min == null && startDate <= max) {
+                        return true;
+                    }
+                    if (max == null && startDate >= min) {
+                        return true;
+                    }
+                    if (startDate <= max && startDate >= min) {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+
+            $("#min-date").datepicker({
+                onSelect: function () {
+                    activeTable.draw();
+                },
+                changeMonth: true,
+                changeYear: true
+            });
+            $("#max-date").datepicker({
+                onSelect: function () {
+                    activeTable.draw();
+                },
+                changeMonth: true,
+                changeYear: true
+            });
+
+            // Event listener to the date range filtering inputs to redraw on input
+            $('#min-date, #max-date').change(function () {
+                activeTable.draw();
             });
 
             // Toggle between active and inactive tabs
             $('#activeTab').click(function () {
                 $('#activeTableContainer').show();
-                $('#map').show();
-                $('#inactiveTableContainer').hide();
                 activeTable.columns.adjust().draw();
                 return false;
             });
 
-            $('#inactiveTab').click(function () {
-                $('#activeTableContainer').hide();
-                $('#map').hide();
-                $('#inactiveTableContainer').show();
-                inactiveTable.columns.adjust().draw();
-                return false;
-            });
-        });
+            var LocationBefore = [];
+            var AllOfLocation = []; 
+            <% data.forEach(element => { %>
+                console.log("<%= element.location %>");
+                LocationBefore.push("<%= element.location %>");
+            <% }); %>
 
-        // Initialize and add the map
-        var AllOfLocation = [];
-        <% data.activeRows.forEach(element => { %>
-            console.log("Latitude:", <%= element.latitude %>);
-            console.log("Longitude:", <%= element.longitude %>);
-            AllOfLocation.push({
-                lat: <%= element.latitude %>,
-                lng: <%= element.longitude %>
-            });
-        <% }); %>
-
-        function initMap() {
-            var defaultLocation = {
-                lat: 13.7563,
-                lng: 100.5018
-            };
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 6,
-                center: defaultLocation
-            });
-            // Create markers from AllOfLocation array
-            AllOfLocation.forEach(location => {
-                var marker = new google.maps.Marker({
-                    position: location,
-                    map: map,
-                    title: "Your title here" // Replace with your actual title logic
+            function initMap() {
+                LocationBefore.forEach(item => {
+                    var latLng = item.split(',');
+                    var lat = parseFloat(latLng[0]);
+                    var lng = parseFloat(latLng[1]);
+                    AllOfLocation.push({
+                        lat: lat,
+                        lng: lng
+                    });
                 });
-            });
-        }
-
-        initMap();
+                var defaultLocation = {
+                    lat: 13.7563,
+                    lng: 100.5018
+                };
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 6,
+                    center: defaultLocation
+                });
+                // Create markers from AllOfLocation array
+                AllOfLocation.forEach(location => {
+                    if (location != null) {
+                        var marker = new google.maps.Marker({
+                            position: location,
+                            map: map,
+                        });
+                    }
+                });
+            }
+            initMap();
+        });
     </script>
+
     <!-- map -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDs0D4pKWbnAcK8bP9tIvpvPpU364v-So&callback=initMap"
         async defer></script>

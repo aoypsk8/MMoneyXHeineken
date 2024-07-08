@@ -1,25 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const faker = require('faker');
 const { Client } = require('pg');
+
 // Database connection details
-const client = new Client({
+const dbConfig = {
     host: '172.28.26.8',
     database: 'lmm',
     user: 'lmm',
     password: 'Mm0ney@2024',
     port: 5432,
-});
+};
 
 router.get("/", (req, res) => {
-    // Example data to pass to the template
-    // const data = {
-    //     title: 'Tailwind with EJS',
-    //     heading: 'Hello from Tailwind CSS with EJS!',
-    //     paragraph: 'This is a paragraph styled with Tailwind CSS.',
-    //     items: ['HI!@#!', 'Item 2', 'Item 3']
-    // };
-    // res.render('Login', data);
     res.render('Login');
 });
 
@@ -28,67 +20,40 @@ router.post('/doLogin', (req, res) => {
     console.log('Received login request:', { username, password });
 
     // Replace with your own authentication logic
-    if (username === 'user' && password === 'password') {
+    if (username === '1' && password === '1') {
         res.json({ success: true, redirectUrl: '/dashboard' });
     } else {
         res.json({ success: false, message: 'ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກ !' });
     }
 });
+
 router.get('/dashboard', async (req, res) => {
+    const client = new Client(dbConfig); // Create a new client instance
 
     try {
-        // Connect to the database
-        await client.connect();
-
+        await client.connect(); // Connect to PostgreSQL
         // Define your query
         const query = `
-          SELECT id, codes, amount, active, created, remark, tranid, msisdn, tran_date, startdate, enddate, title, location
-          FROM public."Redeem";
+            SELECT id, codes, amount, active, created, remark, tranid, msisdn, tran_date, startdate, enddate, title, location
+            FROM public."Redeem" WHERE active = false;
         `;
 
         // Execute the query
-        const res = await client.query(query);
-
-        // Process the results
-        res.rows.forEach(row => {
-            console.log(row);
-        });
+        const result = await client.query(query);
+        const data = result.rows; 
+        // Render the 'Dashboard' view with the retrieved data
+        res.render('Dashboard', { data });
 
     } catch (err) {
-        console.error('Error executing query', err.stack);
+        console.error('Error executing query', err);
+        res.status(500).send('Error fetching data');
     } finally {
-        // Close the database connection
-        await client.end();
-    }
-
-
-
-    const data = {
-        activeRows: [],
-        inactiveRows: []
-    };
-    // Generate 30 rows of fake data
-    for (let i = 0; i < 30; i++) {
-        const row = {
-            id: i + 1,
-            code: faker.random.alphaNumeric(6),
-            amount: faker.finance.amount(),
-            active: faker.random.boolean(),
-            created: faker.date.past().toLocaleDateString(),
-            enddate: faker.date.past().toLocaleDateString(),
-            msisdn: faker.phone.phoneNumber(),
-            latitude: faker.address.latitude(),
-            longitude: faker.address.longitude()
-        };
-
-        if (row.active) {
-            data.activeRows.push(row);
-        } else {
-            data.inactiveRows.push(row);
+        try {
+            await client.end(); // Disconnect the client after use
+        } catch (err) {
+            console.error('Error ending client', err);
         }
     }
-    res.render('Dashboard', { data });
 });
-
 
 module.exports = router;
