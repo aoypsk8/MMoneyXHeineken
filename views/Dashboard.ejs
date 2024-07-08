@@ -128,7 +128,7 @@
                             <%= row.amount %>
                         </td>
                         <td class="border px-4 py-2 text-center">
-                            <%= new Date(row.created).toLocaleDateString('en-US', { timeZone: 'Asia/Bangkok' }) %>
+                            <%= new Date(row.created).toLocaleDateString('lo-La', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'Asia/Bangkok' }) %>
                         </td>
                         <td class="border px-4 py-2 text-center">
                             <%= row.location %>
@@ -154,14 +154,13 @@
 
     <!-- DataTables Initialization -->
     <script>
+        // ສ້າງຄ່າເລີ່ມຕົ້ນ
         $(document).ready(function () {
             var activeTable = $('#activeTable').DataTable({
                 responsive: true,
                 dom: 'Bfrtip',
                 pageLength: 50,
-                buttons: [
-                    'excelHtml5',
-                ]
+                buttons: ['excelHtml5','csv']
             });
 
             // Date range filter
@@ -187,50 +186,46 @@
                 }
             );
 
-            $("#min-date").datepicker({
+            $("#min-date, #max-date").datepicker({
                 onSelect: function () {
                     activeTable.draw();
-                },
-                changeMonth: true,
-                changeYear: true
-            });
-            $("#max-date").datepicker({
-                onSelect: function () {
-                    activeTable.draw();
+                    initMap(); // Call initMap() after drawing
                 },
                 changeMonth: true,
                 changeYear: true
             });
 
-            // Event listener to the date range filtering inputs to redraw on input
-            $('#min-date, #max-date').change(function () {
-                activeTable.draw();
+            // Event listener for DataTables draw event
+            activeTable.on('draw', function () {
+                initMap(); // Call initMap() after any draw event (filtering, pagination, etc.)
             });
 
             // Toggle between active and inactive tabs
             $('#activeTab').click(function () {
                 $('#activeTableContainer').show();
                 activeTable.columns.adjust().draw();
+                initMap(); // Call initMap() when showing the active tab
                 return false;
             });
 
-            var LocationBefore = [];
-            var AllOfLocation = []; 
-            <% data.forEach(element => { %>
-                console.log("<%= element.location %>");
-                LocationBefore.push("<%= element.location %>");
-            <% }); %>
-
             function initMap() {
-                LocationBefore.forEach(item => {
-                    var latLng = item.split(',');
-                    var lat = parseFloat(latLng[0]);
-                    var lng = parseFloat(latLng[1]);
-                    AllOfLocation.push({
-                        lat: lat,
-                        lng: lng
-                    });
+                var AllOfLocation = [];
+
+                activeTable.rows({
+                    search: 'applied'
+                }).data().each(function (row) {
+                    var location = row[5]; // Assuming location is in the 6th column
+                    if (location.length > 0) {
+                        var latLng = location.split(',');
+                        var lat = parseFloat(latLng[0]);
+                        var lng = parseFloat(latLng[1]);
+                        AllOfLocation.push({
+                            lat: lat,
+                            lng: lng
+                        });
+                    }
                 });
+
                 var defaultLocation = {
                     lat: 13.7563,
                     lng: 100.5018
@@ -239,20 +234,26 @@
                     zoom: 6,
                     center: defaultLocation
                 });
+
+                markers = [];
+                // Clear previous markers
+                markers.forEach(function (marker) {
+                    marker.setMap(null);
+                });
+                
+
                 // Create markers from AllOfLocation array
-                AllOfLocation.forEach(location => {
-                    if (location != null) {
-                        var marker = new google.maps.Marker({
-                            position: location,
-                            map: map,
-                        });
-                    }
+                AllOfLocation.forEach(function (location) {
+                    var marker = new google.maps.Marker({
+                        position: location,
+                        map: map,
+                    });
+                    markers.push(marker);
                 });
             }
-            initMap();
+            initMap(); // Call initMap() initially to populate the map with default data
         });
     </script>
-
     <!-- map -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDs0D4pKWbnAcK8bP9tIvpvPpU364v-So&callback=initMap"
         async defer></script>
