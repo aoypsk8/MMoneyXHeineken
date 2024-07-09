@@ -9,6 +9,9 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- GoogleFont -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
@@ -23,6 +26,10 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <style>
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+        }
+
         #map {
             height: 1000px;
             width: 100%;
@@ -41,7 +48,7 @@
             border-width: 2px;
             border-radius: .25rem;
             border-color: #edf2f7;
-            background-color: #edf2f7;
+            background-color: #ffffff;
         }
 
         table.dataTable.hover tbody tr:hover,
@@ -84,17 +91,20 @@
 
 <body class="bg-gray-100 text-gray-900 tracking-wider leading-normal">
     <div class="container mx-auto px-4">
-        <h1 class="flex items-center font-sans font-bold break-normal py-8 text-xl md:text-3xl">
+        <h1 class="flex items-center font-sans font-bold break-normal py-8 text-2xl md:text-3xl">
             <span class="text-red-500">M Money X</span>&nbsp;<span class="text-green-600">Heiniken</span>
         </h1>
 
         <!-- Date Range Inputs -->
-        <div class="mb-4 flex justify-end  ">
-            <label for="min-date" class="mr-2">From:</label>
-            <input type="text" id="min-date" name="min-date" class="border rounded px-2 py-1">
-
-            <label for="max-date" class="ml-4 mr-2">To:</label>
-            <input type="text" id="max-date" name="max-date" class="border rounded px-2 py-1">
+        <div class="mb-4 flex flex-col sm:flex-row justify-end items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <label for="min-date" class="sm:mr-2">ຈາກວັນທີ :</label>
+                <input type="text" id="min-date" name="min-date" class="border rounded px-2 py-1">
+            </div>
+            <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                <label for="max-date" class="sm:ml-4 sm:mr-2">ຫາວັນທີ :</label>
+                <input type="text" id="max-date" name="max-date" class="border rounded px-2 py-1">
+            </div>
         </div>
 
         <!-- Active Table Container -->
@@ -104,6 +114,8 @@
                     <tr class="bg-gray-200">
                         <th class="px-4 py-2">ລຳດັບ</th>
                         <th class="px-4 py-2">Code</th>
+                        <th class="px-4 py-2">ຊຶ່ ແລະ ນາມສະກຸນ</th>
+                        <th class="px-4 py-2">ອາຍຸ</th>
                         <th class="px-4 py-2">ເບິໂທ</th>
                         <th class="px-4 py-2">ມູນຄ່າ</th>
                         <th class="px-4 py-2">ວັນທີ່ເຕີມ</th>
@@ -122,13 +134,19 @@
                             <%= row.codes %>
                         </td>
                         <td class="border px-4 py-2 text-center">
+                            <%= row.fullname %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
+                            <%= row.age %>
+                        </td>
+                        <td class="border px-4 py-2 text-center">
                             <%= row.msisdn %>
                         </td>
                         <td class="border px-4 py-2 text-center">
-                            <%= row.amount %>
+                            <%= new Intl.NumberFormat('en-US').format(row.amount) %> ກີບ
                         </td>
                         <td class="border px-4 py-2 text-center">
-                            <%= new Date(row.created).toLocaleDateString('lo-La', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'Asia/Bangkok' }) %>
+                            <%= new Date(row.created).toLocaleDateString({ day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'Asia/Bangkok' }) %>
                         </td>
                         <td class="border px-4 py-2 text-center">
                             <%= row.location %>
@@ -140,8 +158,9 @@
             </table>
         </div>
 
-        <h1>Locations on Google Maps</h1>
-        <div id="map"></div>
+        <h1 class="flex items-center font-sans font-bold break-normal pt-8 pb-3 text-xl md:text-2xl">
+            ສະແດງຕຳແຫນ່ງການໃຊ້ຄູ່ປ໋ອງໃນ Google Maps</h1>
+        <div id="map" class="mb-10"></div>
 
     </div>
 
@@ -159,8 +178,22 @@
             var activeTable = $('#activeTable').DataTable({
                 responsive: true,
                 dom: 'Bfrtip',
-                pageLength: 50,
-                buttons: ['excelHtml5','csv']
+                pageLength: 40,
+                buttons: ['excelHtml5', 'csv'],
+                language: {
+                    "lengthMenu": "ສະແດງ _MENU_ ລາຍການຕໍ່ໜ້າ",
+                    "zeroRecords": "ບໍ່ພົບຂໍ້ມູນ",
+                    "info": "ສະແດງ _START_ ເຖິງ _END_ ຈາກ _TOTAL_ ລາຍການ",
+                    "infoEmpty": "ບໍ່ມີລາຍການ",
+                    "infoFiltered": "(ກອງມາຈາກ _MAX_ ລາຍການທັງໝົດ)",
+                    "search": "ຄົ້ນຫາ:",
+                    "paginate": {
+                        "first": "ຫນ້າທຳອິດ",
+                        "last": "ຫນ້າສຸດທ້າຍ",
+                        "next": "ຕໍ່ໄປ",
+                        "previous": "ກັບຄືນ"
+                    }
+                }
             });
 
             // Date range filter
@@ -168,7 +201,7 @@
                 function (settings, data, dataIndex) {
                     var min = $('#min-date').datepicker("getDate");
                     var max = $('#max-date').datepicker("getDate");
-                    var startDate = new Date(data[4]);
+                    var startDate = new Date(data[6]);
 
                     if (min == null && max == null) {
                         return true;
@@ -197,14 +230,14 @@
 
             // Event listener for DataTables draw event
             activeTable.on('draw', function () {
-                initMap(); // Call initMap() after any draw event (filtering, pagination, etc.)
+                initMap();
             });
 
             // Toggle between active and inactive tabs
             $('#activeTab').click(function () {
                 $('#activeTableContainer').show();
                 activeTable.columns.adjust().draw();
-                initMap(); // Call initMap() when showing the active tab
+                initMap();
                 return false;
             });
 
@@ -214,7 +247,7 @@
                 activeTable.rows({
                     search: 'applied'
                 }).data().each(function (row) {
-                    var location = row[5]; // Assuming location is in the 6th column
+                    var location = row[7]; // Assuming location is in the 6th column
                     if (location.length > 0) {
                         var latLng = location.split(',');
                         var lat = parseFloat(latLng[0]);
@@ -227,11 +260,11 @@
                 });
 
                 var defaultLocation = {
-                    lat: 13.7563,
-                    lng: 100.5018
+                    lat: 17.972425792430897,
+                    lng: 102.61804880906422
                 };
                 var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 6,
+                    zoom: 9,
                     center: defaultLocation
                 });
 
@@ -240,7 +273,7 @@
                 markers.forEach(function (marker) {
                     marker.setMap(null);
                 });
-                
+
 
                 // Create markers from AllOfLocation array
                 AllOfLocation.forEach(function (location) {

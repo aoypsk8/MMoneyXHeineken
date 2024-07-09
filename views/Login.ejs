@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/css/styles.css">
+  <!-- Include SweetAlert CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
   <title>Login Page</title>
 </head>
 
@@ -18,7 +21,7 @@
         <p class="text-2xl text-unSelectText">ເຂົ້າສູ່ລະບົບ</p>
         <form id="loginForm" class="flex flex-col gap-4 mt-5">
           <div class="flex items-center border-b border-lineColor py-2">
-            <img src="/assets/icons/call.svg" alt="Phone Icon" class="w-7 mr-3" />
+            <img src="/assets/icons/user.svg" alt="Phone Icon" class="w-7 mr-3 " />
             <input autocomplete="off" class="flex-1 border-none outline-none" type="text" name="username"
               id="usernameInput" placeholder="ຊື່ຜູ້ໃຊ້ງານ" />
           </div>
@@ -42,6 +45,8 @@
     </div>
   </section>
 
+  <!-- Include SweetAlert JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
     const userInput = document.getElementById('usernameInput');
@@ -58,22 +63,39 @@
         "username": userInput.value,
         "password": passwordInput.value
       };
-      
+
       axios.post('/doLogin', data)
         .then(response => {
           const data = response.data;
           if (data.success) {
-            window.location.href = data.redirectUrl;
+            Swal.fire({
+              title: data.message,
+              icon: 'success',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              window.location.href = data.redirectUrl;
+            });
           } else {
-            alert(data.message);
+            Swal.fire({
+              title: 'Error!',
+              text: data.message,
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
           }
+
         })
         .catch(error => {
-          console.error('Error:', error);
-          alert('An error occurred while logging in.');
+          Swal.fire({
+            title: 'Error!',
+            text: error,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
         });
     });
   </script>
+
 
 </body>
 
