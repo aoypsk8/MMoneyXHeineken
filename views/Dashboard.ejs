@@ -9,6 +9,9 @@
     <meta name="description" content="">
     <meta name="keywords" content="">
     <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- MapBOX -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
 
     <!-- GoogleFont -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100..900&display=swap" rel="stylesheet">
@@ -90,6 +93,12 @@
 
 
 <body class="bg-gray-100 text-gray-900 tracking-wider leading-normal">
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js">
+    </script>
+    <link rel="stylesheet"
+        href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css"
+        type="text/css">
+
     <div class="container mx-auto px-4">
         <h1 class="flex items-center font-sans font-bold break-normal py-8 text-2xl md:text-3xl">
             <span class="text-red-500">M Money X</span>&nbsp;<span class="text-green-600">Heiniken</span>
@@ -242,12 +251,14 @@
             });
 
             function initMap() {
+                mapboxgl.accessToken =
+                    'pk.eyJ1IjoiYW95cHNrOCIsImEiOiJjbHlkdDZwbzUwOHRsMmxvajN3dTZhZjZmIn0.KH6ARraUJpu9WpV-_sK7kw'; // Replace with your Mapbox access token
                 var AllOfLocation = [];
 
                 activeTable.rows({
                     search: 'applied'
                 }).data().each(function (row) {
-                    var location = row[7]; // Assuming location is in the 6th column
+                    var location = row[7];
                     if (location.length > 0) {
                         var latLng = location.split(',');
                         var lat = parseFloat(latLng[0]);
@@ -259,33 +270,53 @@
                     }
                 });
 
-                var defaultLocation = {
-                    lat: 17.972425792430897,
-                    lng: 102.61804880906422
-                };
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 9,
-                    center: defaultLocation
+                var defaultLocation = [102.61804880906422, 17.972425792430897];
+
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: defaultLocation,
+                    zoom: 9
                 });
 
-                markers = [];
+                var markers = [];
+
                 // Clear previous markers
                 markers.forEach(function (marker) {
-                    marker.setMap(null);
+                    marker.remove();
                 });
-
+                markers = []; // Clear markers array
 
                 // Create markers from AllOfLocation array
                 AllOfLocation.forEach(function (location) {
-                    var marker = new google.maps.Marker({
-                        position: location,
-                        map: map,
-                    });
+                    // var customMarker = document.createElement('div');
+                    // customMarker.className = 'custom-marker';
+                    // customMarker.style.backgroundImage = 'url(/assets/icons/lock.svg)';
+                    // customMarker.style.width = '32px';
+                    // customMarker.style.height = '32px';
+
+                    var marker = new mapboxgl.Marker(
+                        // {
+                        //     element: customMarker
+                        // }
+                    )
+                        .setLngLat([location.lng, location.lat])
+                        .addTo(map);
+
                     markers.push(marker);
                 });
             }
-            initMap(); // Call initMap() initially to populate the map with default data
+
+            initMap();
+
+
         });
+
+
+
+
+
+        // MAPBOX
     </script>
     <!-- map -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDs0D4pKWbnAcK8bP9tIvpvPpU364v-So&callback=initMap"
