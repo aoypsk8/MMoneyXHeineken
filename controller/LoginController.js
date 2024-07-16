@@ -26,7 +26,7 @@ class LoginController {
                 res.json({ success: false, message: 'ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກ !' });
             }
         } catch (error) {
-
+            res.json({ success: false, message: error });
         }
     }
 }
