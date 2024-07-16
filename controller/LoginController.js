@@ -13,7 +13,8 @@ class LoginController {
             { username: 'AmberSunset', password: 'Golden&25' },
             { username: 'SilverDragon', password: 'Knight@64' },
             { username: 'RubyStar71', password: 'Diamond#88' },
-            { username: 'Neptune55', password: 'Trident$39' }
+            { username: 'Neptune55', password: 'Trident$39' },
+            { username: 'admin', password: 'admin' }
         ];
         try {
             const { username, password } = req.body;

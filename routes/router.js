@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-
 const session = require('express-session');
 
+// Controller import
 const LoginControllers = require('../controller/LoginController');
 const DashboardController = require('../controller/DashboardController');
 
-
+//Initialize session management for login user
 router.use(session({
     secret: 'MMoneyX',
     resave: false,
@@ -23,19 +23,19 @@ const ensureAuthenticated = (req, res, next) => {
     }
 };
 
-//First run
+// Route to render the login page
 router.get("/", (req, res) => {
     res.render('Login');
 });
 
-// Login Logic
+// Route to handle login logic
 router.post('/doLogin', LoginControllers.doLogin);
 
-//Dashboard
+// Route to render the dashboard, only if authenticated
 router.get('/dashboard', ensureAuthenticated, DashboardController.fetchDashboard);
 
 
-// Not Found handler for other routes
+// Catch-all route handler for undefined routes, renders "Not Found" page
 router.get('*', (req, res) => {
     res.render('NotFound');
 });
