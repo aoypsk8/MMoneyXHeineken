@@ -278,9 +278,7 @@
                     center: defaultLocation,
                     zoom: 9
                 });
-
                 var markers = [];
-
                 // Clear previous markers
                 markers.forEach(function (marker) {
                     marker.remove();
@@ -289,20 +287,9 @@
 
                 // Create markers from AllOfLocation array
                 AllOfLocation.forEach(function (location) {
-                    // var customMarker = document.createElement('div');
-                    // customMarker.className = 'custom-marker';
-                    // customMarker.style.backgroundImage = 'url(/assets/icons/lock.svg)';
-                    // customMarker.style.width = '32px';
-                    // customMarker.style.height = '32px';
-
-                    var marker = new mapboxgl.Marker(
-                        // {
-                        //     element: customMarker
-                        // }
-                    )
+                    var marker = new mapboxgl.Marker()
                         .setLngLat([location.lng, location.lat])
                         .addTo(map);
-
                     markers.push(marker);
                 });
             }
